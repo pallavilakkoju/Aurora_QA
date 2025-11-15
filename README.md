@@ -13,81 +13,10 @@ A question-answering system that analyzes chat messages and provides intelligent
 ## 📋 Prerequisites
 
 - Python 3.8+
-- Groq API key (get one at [console.groq.com](https://console.groq.com))
-- Internet connection (for fetching messages and downloading models)
+- Groq API key 
 
-## 🛠️ Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/pallavilakkoju/Aurora_QA.git
-   cd Aurora_QA
-   ```
 
-2. **Create a virtual environment** (recommended)
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Set up environment variables**
-   
-   Create a `.env` file in the root directory:
-   ```env
-   GROQ_API_KEY=your_groq_api_key_here
-   ```
-   
-   **Important**: Never commit your `.env` file to git. It's already in `.gitignore`.
-
-## 🎯 Usage
-
-### Running Locally
-
-1. **Start the server**
-   ```bash
-   python app.py
-   ```
-   
-   Or using uvicorn directly:
-   ```bash
-   uvicorn app:app --reload --port 8001
-   ```
-
-2. **Access the web interface**
-   - Open your browser and go to `http://localhost:8001`
-   - Enter your question in the text field
-   - Click "Submit Question" to get an answer
-
-### API Usage
-
-**Endpoint**: `POST /ask`
-
-**Request Body**:
-```json
-{
-  "question": "when is layla planning trip?",
-  "top_k": 10
-}
-```
-
-**Response**:
-```json
-{
-  "answer": "Based on the messages, Layla is planning a trip..."
-}
-```
-
-**Example using curl**:
-```bash
-curl -X POST "http://localhost:8001/ask" \
-  -H "Content-Type: application/json" \
-  -d '{"question": "when is layla planning trip?", "top_k": 10}'
-```
 
 ## 🏗️ Architecture
 
@@ -115,9 +44,9 @@ The system follows a RAG (Retrieval-Augmented Generation) architecture:
 
 The service is deployed on Render and publicly accessible. The deployment configuration is in `render.yaml`.
 
-**Live URL**: [Your Render deployment URL]
+**Live URL**: https://aurora-qa-3ddz.onrender.com
 
-## 📝 Design Notes (Bonus 1)
+## 📝 Design Notes 
 
 ### Alternative Approaches Considered
 
@@ -126,7 +55,10 @@ The service is deployed on Render and publicly accessible. The deployment config
 - **Alternatives Considered**:
   - `all-mpnet-base-v2`: Better accuracy but slower (768 dimensions)
   - `sentence-transformers/all-MiniLM-L12-v2`: Larger model with better performance
-  - **Rationale**: Chose `all-MiniLM-L6-v2` for balance between speed and accuracy, especially important for real-time queries
+  - `Hugging Face Inference API (google/flan-t5-large)`: I tried this as an alternative, but the model produced incomplete        answers (ending in ellipses) because:
+     -Default generation parameters were too restrictive.
+     -HF Inference API limits max output tokens unless configured manually.
+- **Rationale**: Chose `all-MiniLM-L6-v2` for balance between speed and accuracy, especially important for real-time queries
 
 #### 2. **Vector Database Options**
 - **Current Choice**: FAISS (in-memory)
@@ -150,26 +82,14 @@ The service is deployed on Render and publicly accessible. The deployment config
 - **Alternatives Considered**:
   - **BM25/Keyword Search**: Fast but misses semantic relationships
   - **Hybrid Search**: Combines keyword + semantic, better recall but more complex
-  - **Re-ranking**: Use a cross-encoder to re-rank results, better precision but slower
   - **Rationale**: Pure semantic search chosen for simplicity and good performance on conversational queries
 
 #### 5. **Architecture Patterns**
 - **Current Choice**: RAG (Retrieval-Augmented Generation)
 - **Alternatives Considered**:
   - **Fine-tuning**: Train a model on the dataset, but requires labeled data and compute
-  - **Few-shot Learning**: Provide examples in prompt, but limited by context window
-  - **Knowledge Graph**: Build relationships between entities, but complex to implement
-  - **Rationale**: RAG chosen for flexibility, no training required, and ability to update knowledge by refreshing the index
 
-#### 6. **Context Construction**
-- **Current Choice**: Simple concatenation of top-k messages with timestamps
-- **Alternatives Considered**:
-  - **Weighted combination**: Weight messages by similarity score
-  - **Deduplication**: Remove duplicate or very similar messages
-  - **Temporal ordering**: Sort by timestamp for better narrative flow
-  - **Rationale**: Simple approach chosen for initial implementation; could be enhanced with deduplication for better results
-
-## 🔍 Data Insights (Bonus 2)
+## 🔍 Data Insights 
 
 ### Anomalies and Inconsistencies Identified
 
@@ -200,17 +120,7 @@ After analyzing the dataset, several anomalies and inconsistencies were identifi
 - Unicode characters that might cause issues in embedding generation
 - **Impact**: Could lead to incorrect embeddings or parsing errors
 
-#### 6. **Message Length Inconsistencies**
-- Very long messages (multi-paragraph) mixed with very short ones
-- Inconsistent formatting (some with line breaks, some without)
-- **Impact**: Embeddings may not capture full context for very long messages
-
-#### 7. **Temporal Gaps**
-- Large time gaps between consecutive messages from the same user
-- Messages out of chronological order (possibly due to API pagination)
-- **Impact**: Makes timeline-based analysis challenging
-
-#### 8. **User ID Inconsistencies**
+#### 6. **User ID Inconsistencies**
 - Some messages have user_id that doesn't match user_name
 - Missing user_id for some messages
 - **Impact**: Makes user tracking and filtering difficult
@@ -222,12 +132,10 @@ After analyzing the dataset, several anomalies and inconsistencies were identifi
 3. **Deduplication**: Remove or flag duplicate messages before indexing
 4. **User Name Normalization**: Standardize user name formats (lowercase, trim whitespace)
 5. **Message Filtering**: Filter out messages below a minimum length threshold
-6. **Chunking Strategy**: For very long messages, consider chunking them into smaller segments
 
 ## 🔒 Security Notes
 
 - API keys are stored in `.env` file (not committed to git)
-- Never expose your Groq API key in code or logs
 - The `.env` file is in `.gitignore` to prevent accidental commits
 
 ## 📦 Project Structure
@@ -245,22 +153,9 @@ aurora/
     └── placeholder.txt
 ```
 
-## 🤝 Contributing
-
-This is a project repository. For issues or improvements, please open an issue or submit a pull request.
-
-## 📄 License
-
-[Specify your license here]
 
 ## 👤 Author
-
 Pallavi Lakkoju
 
-## 🙏 Acknowledgments
 
-- Sentence Transformers for embedding models
-- FAISS for vector search
-- Groq for fast LLM inference
-- FastAPI for the web framework
 
