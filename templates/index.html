@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chat Analyzer Console</title>
+<style>
+    body {font-family: Arial, sans-serif; background: #f4f4f4; margin:0; padding:0}
+    .container {max-width: 900px; margin: 40px auto; background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 0 12px rgba(0,0,0,0.1)}
+    h2 {text-align:center; margin-bottom:24px}
+    textarea {width:100%; height:140px; padding:12px; margin-bottom:16px; resize:none; font-size:16px}
+    button {padding:10px 22px; border:none; background:#0078ff; color:#fff; cursor:pointer; border-radius:4px; font-size:16px}
+    button:hover {background:#005fcc}
+    .answer-box {margin-top:20px; background:#e9ecef; padding:16px; border-radius:6px; min-height:120px; white-space: pre-wrap}
+    .loader {display:none; margin-top:12px}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Chat Analyzer Question Console</h2>
+    <textarea id="questionInput" placeholder="Enter your question"></textarea>
+    <button onclick="submitQuestion()">Submit Question</button>
+    <div class="loader" id="loader">Processing your query. Please wait...</div>
+    <div class="answer-box" id="answerBox"></div>
+</div>
+
+<script>
+async function submitQuestion() {
+    const question = document.getElementById("questionInput").value.trim();
+    if (!question) {
+        alert("Enter a question.");
+        return;
+    }
+
+    document.getElementById("loader").style.display = "block";
+    document.getElementById("answerBox").innerText = "";
+    
+    try {
+        const response = await fetch("/ask", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({question: question})
+        });
+
+        const data = await response.json();
+        document.getElementById("answerBox").innerText = data.answer || data.error;
+    } catch (err) {
+        document.getElementById("answerBox").innerText = "Error contacting server.";
+    } finally {
+        document.getElementById("loader").style.display = "none";
+    }
+}
+</script>
+
+</body>
+</html>
