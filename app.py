@@ -163,7 +163,9 @@ def ask_question(req: QueryRequest):
 #@app.get("/", response_class=HTMLResponse)
 #def ui(request: Request):
 #    return templates.TemplateResponse("index.html", {"request": request})
-
+@app.get("/")
+def root():
+    return {"status": "healthy", "service": "Aurora Q&A API", "endpoint": "/ask"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)
