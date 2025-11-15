@@ -157,7 +157,9 @@ def ask_question(req: QueryRequest):
 
 
 # Frontend integration
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Only mount static files if the directory exists
+if os.path.exists("static") and os.path.isdir("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
