@@ -157,12 +157,12 @@ def ask_question(req: QueryRequest):
 
 
 # Frontend integration
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+#app.mount("/static", StaticFiles(directory="static"), name="static")
+#templates = Jinja2Templates(directory="templates")
 
-@app.get("/", response_class=HTMLResponse)
-def ui(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+#@app.get("/", response_class=HTMLResponse)
+#def ui(request: Request):
+#    return templates.TemplateResponse("index.html", {"request": request})
 
 
 if __name__ == "__main__":
